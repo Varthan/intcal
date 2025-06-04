@@ -1,0 +1,546 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Interest Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        canvas {
+            margin-bottom: 20px;
+        }
+		.dark-mode {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+        .dark-mode form {
+            background: #444;
+            color: #f4f4f9;
+        }
+        .dark-mode input, .dark-mode select, .dark-mode button {
+            background: #555;
+            color: #f4f4f9;
+            border: 1px solid #666;
+        }
+        .dark-mode th {
+            background-color: #555;
+        }
+		.form-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-row > div {
+            width: 48%;
+        }
+		.action-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .action-buttons button {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .action-buttons button:last-child {
+            margin-right: 0;
+        }
+        .action-buttons button.calculate {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .action-buttons button.download-csv {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .action-buttons button.download-pdf {
+            background-color: #007bff;
+            color: #fff;
+        }
+		.form-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            flex: 1;
+            margin-right: 10px;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            flex: 2;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group.radio-group {
+            flex-direction: column;
+        }
+        .form-group.radio-group label {
+            margin-bottom: 5px;
+        }
+        .form-group.radio-group input {
+            margin-right: 50px;
+        }
+        .form-group.radio-group .radio-options {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-group.radio-group .radio-options label {
+            flex: 1;
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+	<div class="form-row">
+		<div>
+			<h1>Loan Interest Calculator</h1>
+		</div>
+		<!-- <div>
+			<button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+		</div> -->
+	</div>
+    <form id="loanForm">
+        <div class="form-row">
+			<div>
+				<label for="principal">Principal Amount:</label>
+				<input type="number" id="principal" name="principal" value="1814015" required>
+			</div>
+			<div>
+				<label for="businessDate">Last Modified Date of the Principal Amount:</label>
+				<input type="text" id="businessDate" name="businessDate" value="" required>
+			</div>
+		</div>
+        <div class="form-row">
+            <div>
+                <label for="interestRate">Interest Rate (% per annum):</label>
+                <input type="number" id="interestRate" name="interestRate" value="8.6" step="0.01" required>
+            </div>
+            <div>
+                <label for="emiAmount">EMI Amount:</label>
+                <input type="number" id="emiAmount" name="emiAmount" value="26000" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="emiDate">EMI Repayment Date (1-30):</label>
+                <input type="number" id="emiDate" name="emiDate" value="10" min="1" max="30" required>
+            </div>
+            <div>
+                <label for="interestAdjustment">Interest Adjustment Amount:</label>
+                <input type="number" id="interestAdjustment" name="interestAdjustment" value="6" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group radio-group">
+                <label>Interest Adjustment Type:</label>
+                <div class="radio-options">
+					<label><input type="radio" name="interestAdjustmentType" value="floor" checked> Floor</label>
+					<label><input type="radio" name="interestAdjustmentType" value="roof"> Roof</label>
+				</div>
+            </div>
+            <div class="form-group radio-group">
+                <label>Interest Calculation Type:</label>
+                <div class="radio-options">
+					<label><input type="radio" name="interestCalcType" value="30/360"> 30/360</label>
+					<label><input type="radio" name="interestCalcType" value="30/365" checked> 30/365</label>
+				</div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button type="button" class="calculate" onclick="calculateLoan()">Calculate</button>
+            <button type="button" class="download-pdf" onclick="downloadPDF()">Download PDF</button>
+            <!-- <button type="button" class="download-csv" onclick="downloadCSV()">Download CSV</button> -->
+			<button type="button" class="download-csv" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        </div>
+    </form>
+    
+    <h2>Loan Statement</h2>
+    <table id="statementTable" border="1">
+        <thead>
+            <tr>
+                <th>Sr. No.</th>
+                <th>Date</th>
+                <th>Txn Desc</th>
+                <th>Cr/Dr</th>
+                <th>Txn Amount</th>
+                <th>Actual Int.</th>
+                <th>Calculated Int.</th>
+                <th>Adjusted Int.</th>
+                <th>Outstanding Principal</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    
+    <h2>Outstanding Principal Over Time</h2>
+    <canvas id="principalChart"></canvas>
+    
+    <h2>Interest Paid Over Time</h2>
+    <canvas id="interestChart"></canvas>
+    
+    <h2>Principal vs Interest</h2>
+    <canvas id="pieChart"></canvas>
+    
+    <script>
+		let fixed_date = "30-Nov-2024";
+        document.getElementById('businessDate').value = new Date(fixed_date).toLocaleDateString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric'
+        }).replace(/ /g, '-');
+		
+		function date_diff(date1, date2) {
+            const diffTime = Math.abs(date2 - date1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+		
+		function interest_calc(principal, days, interest, intType) {
+			return principal * days * (interest / (intType * 100));
+		}
+		
+		function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function calculateLoan() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const businessDate = new Date(document.getElementById('businessDate').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            let emiAmount = parseFloat(document.getElementById('emiAmount').value);
+            const emiDate = parseInt(document.getElementById('emiDate').value);
+            const interestAdjustment = parseFloat(document.getElementById('interestAdjustment').value);
+			const interestAdjustmentType = document.querySelector('input[name="interestAdjustmentType"]:checked').value;
+            const interestCalcType = document.querySelector('input[name="interestCalcType"]:checked').value;
+			const intCalcType = (interestCalcType === '30/360') ? 360 : 365;
+            
+            let outstandingPrincipal = principal;
+            let statement = [];
+            let srNo = 1;
+            let currentDate = new Date(businessDate);
+            let endDate = new Date(currentDate);
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(0); // Last day of the month
+
+			// Add the initial entry with the Last Modified Date and Outstanding Principal
+            statement.push({
+                srNo: srNo++,
+                date: businessDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+                txnDesc: '-',
+				crDr: '-',
+                amount: '-',
+                actualInterest: '-',
+                calculatedInterest: '-',
+                adjustedInterest: '-',
+                outstandingPrincipal: outstandingPrincipal.toFixed(2)
+            });
+			
+            let totalInterestPaid = 0;
+            let totalPrincipalPaid = 0;
+            let previousDate = new Date(businessDate);
+
+            while (outstandingPrincipal > 0) {
+                // EMI Payment
+                if (currentDate.getDate() !== emiDate) {
+                    currentDate.setDate(emiDate);
+                }
+				
+				// EMI Payment Date
+                let emiPaymentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), emiDate);
+                if (emiPaymentDate < currentDate) {
+                    emiPaymentDate.setMonth(emiPaymentDate.getMonth() + 1);
+                }
+                
+                // Interest Calculation Date
+                let interestCalcDate = new Date(emiPaymentDate.getFullYear(), emiPaymentDate.getMonth() + 1, 0);
+				let dateDiff1 = 0;
+				let tempOutPrincipal1 = outstandingPrincipal;
+                
+				if(outstandingPrincipal <= emiAmount) {
+					emiAmount = outstandingPrincipal;
+				}
+				
+				if (emiPaymentDate > businessDate) {
+					dateDiff1 = date_diff(previousDate, currentDate);
+					outstandingPrincipal -= emiAmount;
+					totalPrincipalPaid += emiAmount;
+					statement.push({
+						srNo: srNo++,
+						date: currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+						txnDesc: 'REPAYMENT',
+						crDr: 'Dr',
+						amount: emiAmount,
+						actualInterest: interest_calc(tempOutPrincipal1, dateDiff1, interestRate, intCalcType).toFixed(2),
+						calculatedInterest: '',
+						adjustedInterest: '',
+						outstandingPrincipal: outstandingPrincipal.toFixed(2)
+					});
+					previousDate = new Date(currentDate);
+				}
+
+				if (outstandingPrincipal > 0 && interestCalcDate > businessDate) {
+					// Interest Calculation
+					let dateDiff2 = date_diff(previousDate, interestCalcDate);
+					let interest1 = interest_calc(tempOutPrincipal1, dateDiff1, interestRate, intCalcType);
+					let interest2 = interest_calc(outstandingPrincipal, dateDiff2, interestRate, intCalcType);
+					let interest = interest1 + interest2;
+					let actualInterest = (interestAdjustmentType === 'floor') ? Math.floor(interest) - interestAdjustment : Math.ceil(interest) - interestAdjustment;
+					let adjustedInterest = actualInterest - interest;
+					let tempOutPrincipal = outstandingPrincipal;
+
+					outstandingPrincipal += actualInterest;
+					totalInterestPaid += actualInterest;
+					statement.push({
+						srNo: srNo++,
+						date: interestCalcDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+						txnDesc: 'INTEREST',
+						crDr: 'Cr',
+						amount: actualInterest.toFixed(2),
+						actualInterest: interest_calc(tempOutPrincipal, dateDiff2, interestRate, intCalcType).toFixed(2),
+						calculatedInterest: interest.toFixed(2),
+						adjustedInterest: adjustedInterest.toFixed(2),
+						outstandingPrincipal: outstandingPrincipal.toFixed(2)
+					});
+					previousDate = new Date(interestCalcDate);
+				}
+
+                // Move to next month
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                endDate.setMonth(endDate.getMonth() + 1);
+                endDate.setDate(0); // Last day of the month
+            }
+
+            // Update the statement table
+            const tableBody = document.getElementById('statementTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            statement.forEach(row => {
+                const newRow = tableBody.insertRow();
+                newRow.insertCell(0).innerText = row.srNo;
+                newRow.insertCell(1).innerText = row.date;
+                newRow.insertCell(2).innerText = row.txnDesc;
+                newRow.insertCell(3).innerText = row.crDr;
+                newRow.insertCell(4).innerText = row.amount;
+                newRow.insertCell(5).innerText = row.actualInterest;
+                newRow.insertCell(6).innerText = row.calculatedInterest;
+                newRow.insertCell(7).innerText = row.adjustedInterest;
+                newRow.insertCell(8).innerText = row.outstandingPrincipal;
+            });
+
+            // Update the chart
+            const ctx = document.getElementById('principalChart').getContext('2d');
+            const labels = statement.map(row => row.date);
+            const data = statement.map(row => parseFloat(row.outstandingPrincipal));
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Outstanding Principal',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Outstanding Principal'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update the interest chart
+            const interestCtx = document.getElementById('interestChart').getContext('2d');
+            const interestData = statement.filter(row => row.crDr === 'Dr').map(row => parseFloat(row.amount));
+            new Chart(interestCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels.filter((_, index) => index % 2 !== 0),
+                    datasets: [{
+                        label: 'Interest Paid',
+                        data: interestData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Interest Paid'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update the pie chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Principal Paid', 'Interest Paid'],
+                    datasets: [{
+                        data: [totalPrincipalPaid, totalInterestPaid],
+                        backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Principal vs Interest'
+                        }
+                    }
+                }
+            });
+        }
+
+        function downloadCSV() {
+            const table = document.getElementById('statementTable');
+            let csvContent = '';
+            for (let i = 0; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const rowData = [];
+                for (let j = 0; j < row.cells.length; j++) {
+                    rowData.push(row.cells[j].innerText);
+                }
+                csvContent += rowData.join(',') + '\n';
+            }
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'loan_statement.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+		
+		function downloadPDF() {
+			const { jsPDF } = window.jspdf;
+			const doc = new jsPDF();
+
+			// Get input details
+			const principal = document.getElementById('principal').value;
+			const businessDate = document.getElementById('businessDate').value;
+			const interestRate = document.getElementById('interestRate').value;
+			const emiAmount = document.getElementById('emiAmount').value;
+			const emiDate = document.getElementById('emiDate').value;
+			const interestAdjustment = document.getElementById('interestAdjustment').value;
+			const interestCalcType = document.querySelector('input[name="interestCalcType"]:checked').value;
+			const interestAdjustmentType = document.querySelector('input[name="interestAdjustmentType"]:checked').value;
+
+			// Add input details to the PDF
+			doc.text("Loan Interest Calculator - Input Details", 14, 15);
+			doc.text(`Principal Amount: ${principal}`, 14, 25);
+			doc.text(`Principal Amount Last Modified Date: ${businessDate}`, 14, 35);
+			doc.text(`Interest Rate: ${interestRate}%`, 14, 45);
+			doc.text(`Interest Calculation Type: ${interestCalcType}`, 14, 55);
+			doc.text(`EMI Amount: ${emiAmount}`, 14, 65);
+			doc.text(`EMI Repayment Date: ${emiDate}`, 14, 75);
+			doc.text(`Interest Adjustment Amount: ${interestAdjustment}`, 14, 85);
+			doc.text(`Interest Adjustment Type: ${interestAdjustmentType}`, 14, 95);
+
+			// Add loan statement table to the PDF
+			doc.text("Loan Statement", 14, 110);
+			doc.autoTable({
+				html: '#statementTable',
+				startY: 115,
+				theme: 'grid',
+				headStyles: { fillColor: [22, 160, 133] },
+				styles: { fontSize: 8 }
+			});
+
+			doc.save("loan_statement.pdf");
+		}
+
+    </script>
+</body>
+</html>
