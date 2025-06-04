@@ -1,0 +1,2 @@
+# intCal
+Loan Interest Calculator
