@@ -289,37 +289,37 @@
 				</div>
             </div> -->
                 <div>
-                    <label for="addAddlPay">By clicking the below button to add n number of additional payments:</label>
+                    <label for="addAddlPay">Click the button below to add one or more additional payments:</label>
                     <div class="action-buttons">
                         <button type="button" id="addAddlPay" class="action-buttons, add-addlpay" onclick="addAddlPayment()">Add Additional Payments</button>
                     </div>
                 </div>
             </div>
-            <div>
-                <table id="addlPayTable" border="1">
-                    <thead>
-                        <tr>
-                            <th>Addl Pay No.</th>
-                            <th>Date</th>
-                            <th>Cr/Dr</th>
-                            <th>Txn Amount</th>
-                            <th>Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody id="payments">
-                        <!-- <td>0</td>
-					<td><input type="date" class="payDate" value="2025-07-20"></td>
-					<td>
-						<select class="payType">
-							<option value="Dr">Dr</option>
-							<option value="Cr">Cr</option>
-						</select>
-					</td>
-					<td><input type="number" class="payAmount" value="20000"></td>
-					<td><span class="remove-btn"> X - Delete </span></td> -->
-                    </tbody>
-                </table>
-            </div>
+            
+			<table id="addlPayTable" name="addlitionalPay" style="display:none;" border="1">
+				<thead>
+					<tr>
+						<th>Addl Pay No.</th>
+						<th>Date</th>
+						<th>Cr/Dr</th>
+						<th>Txn Amount</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody id="payments">
+					<!-- <td>0</td>
+				<td><input type="date" class="payDate" value="2025-07-20"></td>
+				<td>
+					<select class="payType">
+						<option value="Dr">Dr</option>
+						<option value="Cr">Cr</option>
+					</select>
+				</td>
+				<td><input type="number" class="payAmount" value="20000"></td>
+				<td><span class="remove-btn"> X - Delete </span></td> -->
+				</tbody>
+			</table>
+			
             <div class="action-buttons">
                 <button type="button" class="genSchd" onclick="generateSchedule()">Generate Schedule</button>
                 <button type="button" class="download-pdf" onclick="downloadPDF()">Download PDF</button>
@@ -387,6 +387,7 @@
             }
 
             function addAddlPayment() {
+				document.getElementsByName("addlitionalPay")[0].style.display = "table";
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
 					<td>${paymentCount + 1}</td>
@@ -407,6 +408,9 @@
                 element.parentElement.remove();
                 paymentCount--;
                 updateAddlPaymentLabels();
+				if(paymentCount === 0) {
+					document.getElementsByName("addlitionalPay")[0].style.display = "none";
+				}
             }
 
             function updateAddlPaymentLabels() {
